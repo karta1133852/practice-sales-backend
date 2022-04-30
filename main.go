@@ -27,7 +27,7 @@ func main() {
 	defer db.CloseDB()
 
 	//Start Redis
-	db.InitRedis(1)
+	//db.InitRedis(1)
 
 	server := gin.Default()
 	// 基本設定

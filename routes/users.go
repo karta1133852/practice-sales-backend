@@ -19,5 +19,7 @@ func UsersRoutes(router *gin.RouterGroup) {
 	router.PATCH("/:uid", users.UpdateUser)
 	// 取得使用者的訂單列表
 	router.GET("/:uid/orders", users.GetUserOrders)
+	// 新增訂單
+	router.POST("/:uid/orders", users.NewUserOrders)
 
 }

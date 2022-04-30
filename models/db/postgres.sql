@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
   coin integer NOT NULL,
   point integer NOT NULL,
   vip_type vip_type DEFAULT 'Normal' NOT NULL,
-  accumulate_spent integer DEFAULT 0 NOT NULL
+  accumulated_spent integer DEFAULT 0 NOT NULL
 
   CONSTRAINT positive_coin CHECK (coin >= 0)
   CONSTRAINT positive_point CHECK (point >= 0)
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS orders (
 
 
 CREATE TABLE order_items (
-  product_no integer REFERENCES products ON DELETE RESTRICT,
   order_id integer REFERENCES orders ON DELETE CASCADE,
+  product_no integer REFERENCES products ON DELETE RESTRICT,
   quantity integer,
   PRIMARY KEY (product_no, order_id)
 );

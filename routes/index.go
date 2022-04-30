@@ -8,8 +8,7 @@ import (
 
 func MainRoutes(router *gin.RouterGroup) {
 
-	// AuthRoutes(router.Group("/auth"))
-	// UserRoutes(router.Group("/users"))
+	// TODO auth check with /users, /orders
 	useRoutes("/auth", router)
 	useRoutes("/users", router)
 	useRoutes("/orders", router)

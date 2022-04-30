@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+  app:
+    build: .
+    container_name: practice-sales-backend
+    depends_on: 
+      - db
+    env_file: .env
+    networks:
+      - postgres_network
+    ports:
+      - "3000:3000"
+  db:
+    image: postgres
+    # build: ../practice-sales-postgres/
+    environment:
+      POSTGRES_PASSWORD: "0000"
+    hostname: postgres
+    networks:
+      - postgres_network
+    ports:
+      - "5432:5432"
+    volumes:
+    - ./models/db/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+
+networks:
+  postgres_network:
+    external: false
+    name: postgres_network

@@ -6,7 +6,8 @@ services:
     container_name: practice-sales-backend
     depends_on: 
       - db
-    env_file: .env
+    environment:
+      DB_HOST: postgres # Override local env
     networks:
       - postgres_network
     ports:
@@ -15,14 +16,13 @@ services:
     image: postgres
     environment:
       POSTGRES_PASSWORD: "0000"
-      DB_HOST: "postgres" # Override local env
     hostname: postgres
     networks:
       - postgres_network
     ports:
       - "5432:5432"
     volumes:
-    - ./models/db/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+      - ./models/db/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
 
 networks:
   postgres_network:

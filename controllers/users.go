@@ -61,7 +61,7 @@ func (_ *usersController) GetUser(c *gin.Context) {
 	}{}
 
 	queryStr := `
-		SELECT uid, username, coin, point, vip_type, accumlated_spent
+		SELECT uid, username, coin, point, vip_type, accumulated_spent
 		FROM public.users WHERE uid=$1 LIMIT 1`
 
 	err := db.GetDB().SelectOne(&user, queryStr, uid)

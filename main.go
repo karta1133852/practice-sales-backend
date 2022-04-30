@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"practice-sales-backend/api/middleware"
+	"practice-sales-backend/models/db"
 	"practice-sales-backend/routes"
 )
 
@@ -21,7 +22,12 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	//fmt.Println("test: ", os.Getenv("TEST"))
+	// DB 連線
+	db.InitDB()
+	defer db.CloseDB()
+
+	//Start Redis
+	db.InitRedis(1)
 
 	server := gin.Default()
 	// 基本設定

@@ -1,11 +1,28 @@
+# Local
+## Run
+```
+make build run
+```
 
 # Docker Compose
-
-Postgres docker path：
-```
-../practice-sales-postgres/
-```
-啟動 docker-compose：
+## Build
 ```
 make docker-compose
+```
+
+## Run
+```
+make run-docker-compose
+```
+
+# Docker
+## Build
+```bash
+# make clean-docker if needed
+make [clean-docker] build-docker
+```
+
+## Run
+```
+make run-docker
 ```

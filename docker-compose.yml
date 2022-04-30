@@ -13,9 +13,9 @@ services:
       - "3000:3000"
   db:
     image: postgres
-    # build: ../practice-sales-postgres/
     environment:
       POSTGRES_PASSWORD: "0000"
+      DB_HOST: "postgres" # Override local env
     hostname: postgres
     networks:
       - postgres_network

@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"errors"
-	"practice-sales-backend/models"
-	"practice-sales-backend/models/db"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+
+	"practice-sales-backend/models"
+	"practice-sales-backend/models/db"
 )
 
 // AuthController

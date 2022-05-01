@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"practice-sales-backend/controllers"
-
 	"github.com/gin-gonic/gin"
+
+	"practice-sales-backend/controllers"
 )
 
 var ordersController controllers.Orders

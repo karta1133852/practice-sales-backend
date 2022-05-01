@@ -16,8 +16,6 @@ import (
 	"practice-sales-backend/routes"
 )
 
-type HandlerFunc func(c *gin.Context) error
-
 func main() {
 
 	err := godotenv.Load()

@@ -1,11 +1,9 @@
 package routes
 
 import (
-	//"net/http"
+	"github.com/gin-gonic/gin"
 
 	"practice-sales-backend/controllers"
-
-	"github.com/gin-gonic/gin"
 )
 
 var usersController controllers.Users

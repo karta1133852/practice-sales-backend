@@ -1,10 +1,10 @@
 package routes
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"practice-sales-backend/controllers"
 	"practice-sales-backend/models"
-
-	"github.com/gin-gonic/gin"
 )
 
 var authController controllers.Auth

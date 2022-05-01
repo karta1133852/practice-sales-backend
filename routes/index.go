@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"practice-sales-backend/models"
-
 	"github.com/gin-gonic/gin"
+
+	"practice-sales-backend/models"
 )
 
 var authModel models.Auth

@@ -3,11 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"practice-sales-backend/models"
-	"practice-sales-backend/models/db"
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"practice-sales-backend/models"
+	"practice-sales-backend/models/db"
 )
 
 // AuthController

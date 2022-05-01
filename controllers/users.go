@@ -18,24 +18,6 @@ type Users struct {           // 包裝給外部使用
 
 var usersModel = models.Users{}
 
-// 接收 c.Request.Body
-// Field name 開頭要大寫 -> Public
-type UserData struct {
-	Username string
-	Password string
-}
-
-type User struct {
-	Uid               int
-	Username          string
-	Password          string
-	Salt              string
-	Coin              int
-	Point             int
-	Vip_Type          string
-	Accumulated_spent int
-}
-
 func (_ *usersController) CreateUser(c *gin.Context) {
 
 	userData := struct {
@@ -105,6 +87,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	// 取得使用者與優惠折扣資料
 	uid := c.Param("uid")
+	strTimeNow := time.Now().Format(time.RFC3339)
 	querySelect := `
 		WITH u AS (
 			SELECT *
@@ -127,7 +110,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 				SELECT p_no, pt[1] percentage_off, pt[2] exchange
 				FROM (
 				SELECT p_no, ARRAY_AGG(value ORDER BY promotion_type) pt
-				FROM promotion_item
+				FROM promotion_items
 				WHERE vip_type=(SELECT vip_type FROM u)
 				GROUP BY 1) z
 			) AS pi
@@ -141,7 +124,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		PercentageOff    int `db:"percentage_off"`
 		Exchange         int
 	}{}
-	errSelect := db.GetDB().SelectOne(&data, querySelect, uid, time.Now().Format(time.RFC3339))
+	errSelect := db.GetDB().SelectOne(&data, querySelect, uid, strTimeNow)
 	if errSelect != nil {
 		c.Error(errSelect)
 		return
@@ -171,19 +154,20 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	var orderID int // 新產生的訂單編號
 	row := txn.QueryRow(
-		`INSERT INTO orders (cost_coin, cost_point) VALUES ($1, $2) RETURNING order_id;`,
-		orderData.PayedCoin, orderData.PayedPoint,
+		`INSERT INTO orders (cost_coin, cost_point, time) VALUES ($1, $2, $3) RETURNING order_id;`,
+		orderData.PayedCoin, orderData.PayedPoint, strTimeNow,
 	)
 	if err := row.Scan(&orderID); err != nil {
 		c.Error(err)
 	}
 
+	// ARRAY[$]內使用 Query format 會被強制加上 ' '
 	sqlInsertItem := fmt.Sprintf(`
 		INSERT INTO order_items (order_id, product_no, quantity)
-		VALUES ($1, unnest(ARRAY[%s]), unnest(ARRAY[%s]));`,
-		strNo, strQuantity,
+		VALUES (%d, unnest(ARRAY[%s]), unnest(ARRAY[%s]));`,
+		orderID, strNo, strQuantity,
 	)
-	txn.Exec(sqlInsertItem, orderID)
+	txn.Exec(sqlInsertItem)
 
 	rowUpdated := txn.QueryRow(
 		`UPDATE users

@@ -38,8 +38,6 @@ ALTER ROLE user01 WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLI
 -- Dumped from database version 14.2 (Debian 14.2-1.pgdg110+1)
 -- Dumped by pg_dump version 14.1
 
--- Started on 2022-04-30 23:30:54
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -50,8 +48,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
--- Completed on 2022-04-30 23:30:54
 
 --
 -- PostgreSQL database dump complete
@@ -70,8 +66,6 @@ SET row_security = off;
 -- Dumped from database version 14.2 (Debian 14.2-1.pgdg110+1)
 -- Dumped by pg_dump version 14.1
 
--- Started on 2022-04-30 23:30:55
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -82,8 +76,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
--- Completed on 2022-04-30 23:30:55
 
 --
 -- PostgreSQL database dump complete
@@ -100,8 +92,6 @@ SET row_security = off;
 -- Dumped from database version 14.2 (Debian 14.2-1.pgdg110+1)
 -- Dumped by pg_dump version 14.1
 
--- Started on 2022-04-30 23:30:55
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -114,7 +104,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 3382 (class 1262 OID 16386)
 -- Name: practice-sales-backend; Type: DATABASE; Schema: -; Owner: postgres
 --
 
@@ -137,7 +126,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 833 (class 1247 OID 16388)
 -- Name: promotion_type; Type: TYPE; Schema: public; Owner: user01
 --
 
@@ -150,7 +138,6 @@ CREATE TYPE public.promotion_type AS ENUM (
 ALTER TYPE public.promotion_type OWNER TO user01;
 
 --
--- TOC entry 836 (class 1247 OID 16394)
 -- Name: vip_type; Type: TYPE; Schema: public; Owner: user01
 --
 
@@ -169,7 +156,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 219 (class 1259 OID 16477)
 -- Name: order_items; Type: TABLE; Schema: public; Owner: user01
 --
 
@@ -183,21 +169,20 @@ CREATE TABLE public.order_items (
 ALTER TABLE public.order_items OWNER TO user01;
 
 --
--- TOC entry 216 (class 1259 OID 16447)
 -- Name: orders; Type: TABLE; Schema: public; Owner: user01
 --
 
 CREATE TABLE public.orders (
     order_id integer NOT NULL,
     cost_coin integer NOT NULL,
-    cost_point integer NOT NULL
+    cost_point integer NOT NULL,
+    "time" timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
 ALTER TABLE public.orders OWNER TO user01;
 
 --
--- TOC entry 215 (class 1259 OID 16446)
 -- Name: orders_order_id_seq; Type: SEQUENCE; Schema: public; Owner: user01
 --
 
@@ -213,8 +198,6 @@ CREATE SEQUENCE public.orders_order_id_seq
 ALTER TABLE public.orders_order_id_seq OWNER TO user01;
 
 --
--- TOC entry 3384 (class 0 OID 0)
--- Dependencies: 215
 -- Name: orders_order_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
 --
 
@@ -222,7 +205,6 @@ ALTER SEQUENCE public.orders_order_id_seq OWNED BY public.orders.order_id;
 
 
 --
--- TOC entry 218 (class 1259 OID 16469)
 -- Name: products; Type: TABLE; Schema: public; Owner: user01
 --
 
@@ -236,7 +218,6 @@ CREATE TABLE public.products (
 ALTER TABLE public.products OWNER TO user01;
 
 --
--- TOC entry 217 (class 1259 OID 16468)
 -- Name: products_product_no_seq; Type: SEQUENCE; Schema: public; Owner: user01
 --
 
@@ -252,8 +233,6 @@ CREATE SEQUENCE public.products_product_no_seq
 ALTER TABLE public.products_product_no_seq OWNER TO user01;
 
 --
--- TOC entry 3385 (class 0 OID 0)
--- Dependencies: 217
 -- Name: products_product_no_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
 --
 
@@ -261,11 +240,10 @@ ALTER SEQUENCE public.products_product_no_seq OWNED BY public.products.product_n
 
 
 --
--- TOC entry 212 (class 1259 OID 16413)
--- Name: promotion_item; Type: TABLE; Schema: public; Owner: user01
+-- Name: promotion_items; Type: TABLE; Schema: public; Owner: user01
 --
 
-CREATE TABLE public.promotion_item (
+CREATE TABLE public.promotion_items (
     id integer NOT NULL,
     p_no integer,
     promotion_type public.promotion_type NOT NULL,
@@ -274,14 +252,13 @@ CREATE TABLE public.promotion_item (
 );
 
 
-ALTER TABLE public.promotion_item OWNER TO user01;
+ALTER TABLE public.promotion_items OWNER TO user01;
 
 --
--- TOC entry 211 (class 1259 OID 16412)
--- Name: promotion_item_id_seq; Type: SEQUENCE; Schema: public; Owner: user01
+-- Name: promotion_items_id_seq; Type: SEQUENCE; Schema: public; Owner: user01
 --
 
-CREATE SEQUENCE public.promotion_item_id_seq
+CREATE SEQUENCE public.promotion_items_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -290,19 +267,16 @@ CREATE SEQUENCE public.promotion_item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.promotion_item_id_seq OWNER TO user01;
+ALTER TABLE public.promotion_items_id_seq OWNER TO user01;
 
 --
--- TOC entry 3386 (class 0 OID 0)
--- Dependencies: 211
--- Name: promotion_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
+-- Name: promotion_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
 --
 
-ALTER SEQUENCE public.promotion_item_id_seq OWNED BY public.promotion_item.id;
+ALTER SEQUENCE public.promotion_items_id_seq OWNED BY public.promotion_items.id;
 
 
 --
--- TOC entry 210 (class 1259 OID 16404)
 -- Name: promotions; Type: TABLE; Schema: public; Owner: user01
 --
 
@@ -318,7 +292,6 @@ CREATE TABLE public.promotions (
 ALTER TABLE public.promotions OWNER TO user01;
 
 --
--- TOC entry 209 (class 1259 OID 16403)
 -- Name: promotions_p_no_seq; Type: SEQUENCE; Schema: public; Owner: user01
 --
 
@@ -334,8 +307,6 @@ CREATE SEQUENCE public.promotions_p_no_seq
 ALTER TABLE public.promotions_p_no_seq OWNER TO user01;
 
 --
--- TOC entry 3387 (class 0 OID 0)
--- Dependencies: 209
 -- Name: promotions_p_no_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
 --
 
@@ -343,20 +314,6 @@ ALTER SEQUENCE public.promotions_p_no_seq OWNED BY public.promotions.p_no;
 
 
 --
--- TOC entry 220 (class 1259 OID 16492)
--- Name: the_table; Type: TABLE; Schema: public; Owner: user01
---
-
-CREATE TABLE public.the_table (
-    proposal_id integer,
-    item_id integer
-);
-
-
-ALTER TABLE public.the_table OWNER TO user01;
-
---
--- TOC entry 214 (class 1259 OID 16426)
 -- Name: users; Type: TABLE; Schema: public; Owner: user01
 --
 
@@ -377,7 +334,6 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO user01;
 
 --
--- TOC entry 213 (class 1259 OID 16425)
 -- Name: users_uid_seq; Type: SEQUENCE; Schema: public; Owner: user01
 --
 
@@ -393,8 +349,6 @@ CREATE SEQUENCE public.users_uid_seq
 ALTER TABLE public.users_uid_seq OWNER TO user01;
 
 --
--- TOC entry 3388 (class 0 OID 0)
--- Dependencies: 213
 -- Name: users_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user01
 --
 
@@ -402,7 +356,6 @@ ALTER SEQUENCE public.users_uid_seq OWNED BY public.users.uid;
 
 
 --
--- TOC entry 3209 (class 2604 OID 16450)
 -- Name: orders order_id; Type: DEFAULT; Schema: public; Owner: user01
 --
 
@@ -410,7 +363,6 @@ ALTER TABLE ONLY public.orders ALTER COLUMN order_id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3210 (class 2604 OID 16472)
 -- Name: products product_no; Type: DEFAULT; Schema: public; Owner: user01
 --
 
@@ -418,15 +370,13 @@ ALTER TABLE ONLY public.products ALTER COLUMN product_no SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3202 (class 2604 OID 16416)
--- Name: promotion_item id; Type: DEFAULT; Schema: public; Owner: user01
+-- Name: promotion_items id; Type: DEFAULT; Schema: public; Owner: user01
 --
 
-ALTER TABLE ONLY public.promotion_item ALTER COLUMN id SET DEFAULT nextval('public.promotion_item_id_seq'::regclass);
+ALTER TABLE ONLY public.promotion_items ALTER COLUMN id SET DEFAULT nextval('public.promotion_items_id_seq'::regclass);
 
 
 --
--- TOC entry 3201 (class 2604 OID 16407)
 -- Name: promotions p_no; Type: DEFAULT; Schema: public; Owner: user01
 --
 
@@ -434,7 +384,6 @@ ALTER TABLE ONLY public.promotions ALTER COLUMN p_no SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3204 (class 2604 OID 16429)
 -- Name: users uid; Type: DEFAULT; Schema: public; Owner: user01
 --
 
@@ -442,42 +391,43 @@ ALTER TABLE ONLY public.users ALTER COLUMN uid SET DEFAULT nextval('public.users
 
 
 --
--- TOC entry 3375 (class 0 OID 16477)
--- Dependencies: 219
 -- Data for Name: order_items; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
 COPY public.order_items (order_id, product_no, quantity) FROM stdin;
+3	2	5
+3	3	1
+4	3	2
 \.
 
 
 --
--- TOC entry 3372 (class 0 OID 16447)
--- Dependencies: 216
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
-COPY public.orders (order_id, cost_coin, cost_point) FROM stdin;
+COPY public.orders (order_id, cost_coin, cost_point, "time") FROM stdin;
+4	100	38	2022-05-02 00:49:57
+3	115	10	2022-04-30 16:44:38
 \.
 
 
 --
--- TOC entry 3374 (class 0 OID 16469)
--- Dependencies: 218
 -- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
 COPY public.products (product_no, name, price) FROM stdin;
+1	價格1元	1
+2	價格10元	10
+3	價格100元	100
+4	價格1000元	1000
 \.
 
 
 --
--- TOC entry 3368 (class 0 OID 16413)
--- Dependencies: 212
--- Data for Name: promotion_item; Type: TABLE DATA; Schema: public; Owner: user01
+-- Data for Name: promotion_items; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
-COPY public.promotion_item (id, p_no, promotion_type, vip_type, value) FROM stdin;
+COPY public.promotion_items (id, p_no, promotion_type, vip_type, value) FROM stdin;
 1	1	percentage_off	Normal	0
 2	1	percentage_off	VIP1	5
 3	1	percentage_off	VIP2	10
@@ -488,84 +438,57 @@ COPY public.promotion_item (id, p_no, promotion_type, vip_type, value) FROM stdi
 8	1	exchange	VIP3	100
 9	2	percentage_off	Normal	10
 10	2	exchange	Normal	200
-11	2	percentage_off	VIP1	20
 12	2	exchange	VIP1	200
+11	2	percentage_off	VIP1	12
+13	2	percentage_off	VIP2	15
+14	2	exchange	VIP2	200
+15	2	percentage_off	VIP3	18
+16	2	exchange	VIP3	200
 \.
 
 
 --
--- TOC entry 3366 (class 0 OID 16404)
--- Dependencies: 210
 -- Data for Name: promotions; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
 COPY public.promotions (p_no, event_name, event_content, start_time, end_time) FROM stdin;
 1	預設折扣	\N	\N	\N
-2	優惠測試折扣\n	新的	2022-04-29 13:00:27.409	2022-05-01 13:00:27.409
+2	優惠測試折扣\n	新的	2022-04-29 13:00:27.409	2022-05-15 13:00:27.409
 \.
 
 
 --
--- TOC entry 3376 (class 0 OID 16492)
--- Dependencies: 220
--- Data for Name: the_table; Type: TABLE DATA; Schema: public; Owner: user01
---
-
-COPY public.the_table (proposal_id, item_id) FROM stdin;
-1	83054
-1	81048
-2	71384
-2	24282
-2	19847
-2	18482
-3	84720
-4	18081
-4	73018
-\.
-
-
---
--- TOC entry 3370 (class 0 OID 16426)
--- Dependencies: 214
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
 COPY public.users (uid, username, password, salt, coin, point, vip_type, accumulated_spent) FROM stdin;
-1	user01	aaaa	haha	100	0	Normal	0
-2	user02	bbbb	dada	500	10	VIP1	0
+1	user01	aaaa	haha	885	490	Normal	115
+2	user02	bbbb	dada	1400	962	VIP1	100
 \.
 
 
 --
--- TOC entry 3389 (class 0 OID 0)
--- Dependencies: 215
 -- Name: orders_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
 --
 
-SELECT pg_catalog.setval('public.orders_order_id_seq', 1, false);
+SELECT pg_catalog.setval('public.orders_order_id_seq', 4, true);
 
 
 --
--- TOC entry 3390 (class 0 OID 0)
--- Dependencies: 217
 -- Name: products_product_no_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
 --
 
-SELECT pg_catalog.setval('public.products_product_no_seq', 1, false);
+SELECT pg_catalog.setval('public.products_product_no_seq', 4, true);
 
 
 --
--- TOC entry 3391 (class 0 OID 0)
--- Dependencies: 211
--- Name: promotion_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
+-- Name: promotion_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
 --
 
-SELECT pg_catalog.setval('public.promotion_item_id_seq', 2, true);
+SELECT pg_catalog.setval('public.promotion_items_id_seq', 4, true);
 
 
 --
--- TOC entry 3392 (class 0 OID 0)
--- Dependencies: 209
 -- Name: promotions_p_no_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
 --
 
@@ -573,8 +496,6 @@ SELECT pg_catalog.setval('public.promotions_p_no_seq', 1, true);
 
 
 --
--- TOC entry 3393 (class 0 OID 0)
--- Dependencies: 213
 -- Name: users_uid_seq; Type: SEQUENCE SET; Schema: public; Owner: user01
 --
 
@@ -582,7 +503,6 @@ SELECT pg_catalog.setval('public.users_uid_seq', 2, true);
 
 
 --
--- TOC entry 3222 (class 2606 OID 16481)
 -- Name: order_items order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -591,7 +511,6 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3218 (class 2606 OID 16452)
 -- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -600,7 +519,6 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- TOC entry 3220 (class 2606 OID 16476)
 -- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -609,16 +527,14 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 3214 (class 2606 OID 16419)
--- Name: promotion_item promotion_item_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
+-- Name: promotion_items promotion_items_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
-ALTER TABLE ONLY public.promotion_item
-    ADD CONSTRAINT promotion_item_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.promotion_items
+    ADD CONSTRAINT promotion_items_pkey PRIMARY KEY (id);
 
 
 --
--- TOC entry 3212 (class 2606 OID 16411)
 -- Name: promotions promotions_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -627,7 +543,6 @@ ALTER TABLE ONLY public.promotions
 
 
 --
--- TOC entry 3216 (class 2606 OID 16435)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -636,7 +551,6 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3224 (class 2606 OID 16482)
 -- Name: order_items order_items_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -645,7 +559,6 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3225 (class 2606 OID 16487)
 -- Name: order_items order_items_product_no_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user01
 --
 
@@ -654,30 +567,23 @@ ALTER TABLE ONLY public.order_items
 
 
 --
--- TOC entry 3223 (class 2606 OID 16420)
--- Name: promotion_item promotion_item_p_no_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user01
+-- Name: promotion_items promotion_items_p_no_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user01
 --
 
-ALTER TABLE ONLY public.promotion_item
-    ADD CONSTRAINT promotion_item_p_no_fkey FOREIGN KEY (p_no) REFERENCES public.promotions(p_no);
+ALTER TABLE ONLY public.promotion_items
+    ADD CONSTRAINT promotion_items_p_no_fkey FOREIGN KEY (p_no) REFERENCES public.promotions(p_no);
 
 
 --
--- TOC entry 3383 (class 0 OID 0)
--- Dependencies: 3382
 -- Name: DATABASE "practice-sales-backend"; Type: ACL; Schema: -; Owner: postgres
 --
 
 GRANT TEMPORARY ON DATABASE "practice-sales-backend" TO user01 WITH GRANT OPTION;
 
 
--- Completed on 2022-04-30 23:30:55
-
 --
 -- PostgreSQL database dump complete
 --
-
--- Completed on 2022-04-30 23:30:55
 
 --
 -- PostgreSQL database cluster dump complete

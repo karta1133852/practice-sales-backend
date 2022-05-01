@@ -59,7 +59,11 @@ func (_ *authModel) CreateToken(uid int, username string) (token string, expired
 func (_ *authModel) Authenticate(c *gin.Context) {
 
 	auth := c.GetHeader("Authorization")
-	token := strings.Split(auth, "Bearer ")[1]
+	s := strings.Split(auth, "Bearer ")
+	if len(s) <= 1 {
+		c.Error(errors.New("Token not found"))
+	}
+	token := s[1]
 
 	tokenClaims, err := jwt.ParseWithClaims(token, &Payload{}, func(token *jwt.Token) (i interface{}, err error) {
 		return jwtSecret, nil

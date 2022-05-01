@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"errors"
-	"math"
+	"fmt"
+	"practice-sales-backend/models"
 	"practice-sales-backend/models/db"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +15,8 @@ type usersController struct{} // 方便閱讀 private
 type Users struct {           // 包裝給外部使用
 	*usersController
 }
+
+var usersModel = models.Users{}
 
 // 接收 c.Request.Body
 // Field name 開頭要大寫 -> Public
@@ -62,11 +66,12 @@ func (_ *usersController) GetUser(c *gin.Context) {
 
 	queryStr := `
 		SELECT uid, username, coin, point, vip_type, accumulated_spent
-		FROM public.users WHERE uid=$1 LIMIT 1`
-
+		FROM public.users WHERE uid=$1 LIMIT 1
+	`
 	err := db.GetDB().SelectOne(&user, queryStr, uid)
 	if err != nil {
 		c.Error(err)
+		return
 	}
 
 	c.JSON(200, user)
@@ -80,74 +85,136 @@ func (_ *usersController) GetUserOrders(c *gin.Context) {
 	c.String(200, "GET GetUserOrders()")
 }
 
-type product_item struct {
-	Product_no uint
-	Quantity   uint
-}
-
 func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	// Parse order data
-	var orderData = struct {
-		Total       uint
-		Payed_coin  uint
-		Payed_point uint
-		Exchange    uint
-		Discount    uint
-		Products    []product_item
-	}{}
+	var orderData = models.OrderData{}
 	c.BindJSON(&orderData)
 
-	c.JSON(200, orderData)
-	return
-
 	// 檢查參數
-	if orderData.Total == 0 {
+	if orderData.OriginalPrice == 0 {
 		c.Error(errors.New("訂單金額需大於 0 元"))
+		return
 	}
 
-	discountTotal := uint(math.Round(float64(orderData.Total) * float64(orderData.Discount) / 100.0))
-	equivalentTotal := orderData.Payed_coin + uint(math.Round(float64(orderData.Payed_point)*(float64(orderData.Exchange)/100.0)))
-	if discountTotal != equivalentTotal {
-		c.Error(errors.New("付款金額錯誤"))
+	// 檢查付款金額是否相符
+	if err := usersModel.CheckTotal(orderData); err != nil {
+		c.Error(err)
+		return
 	}
 
 	// 取得使用者與優惠折扣資料
 	uid := c.Param("uid")
 	querySelect := `
-		TODO
+		WITH u AS (
+			SELECT *
+			FROM users
+			WHERE uid=$1
+		)
+		SELECT * FROM
+			(SELECT coin, point, accumulated_spent FROM u) a,
+			(SELECT pi.percentage_off, pi.exchange
+			FROM (
+			SELECT *
+				FROM promotions AS p
+				WHERE
+				($2 BETWEEN p.start_time AND p.end_time) 
+				OR
+				COALESCE(p.start_time, p.end_time) IS NULL
+				ORDER BY p.p_no DESC LIMIT 1
+			) AS p
+			INNER JOIN (
+				SELECT p_no, pt[1] percentage_off, pt[2] exchange
+				FROM (
+				SELECT p_no, ARRAY_AGG(value ORDER BY promotion_type) pt
+				FROM promotion_item
+				WHERE vip_type=(SELECT vip_type FROM u)
+				GROUP BY 1) z
+			) AS pi
+			USING (p_no)) b;
 	`
 
-	user := struct {
-		Coin              int
-		Point             int
-		Vip_Type          string
-		Accumulated_spent int
+	data := struct {
+		Coin             int
+		Point            int
+		AccumulatedSpent int `db:"accumulated_spent"`
+		PercentageOff    int `db:"percentage_off"`
+		Exchange         int
 	}{}
-	errSelect := db.GetDB().SelectOne(&user, querySelect, uid)
+	errSelect := db.GetDB().SelectOne(&data, querySelect, uid, time.Now().Format(time.RFC3339))
 	if errSelect != nil {
 		c.Error(errSelect)
+		return
 	}
 
 	// 檢查金額是否足夠
 	//if user.Coin
+	// TODO 讀取 SQL error 判斷
 
-	queryInsert := `
-		WITH _order_id AS (
-			INSERT INTO orders (cost_coin, cost_point)
-			VALUES ($1, $2) RETURNING order_id;
-		)
-
-		INSERT INTO order_item (order_id, product_no, quantity)
-		VALUES (_order_id, unnest(ARRAY[$3]), unnest(ARRAY[$4]));
-	`
-
-	rows, errInsert := db.GetDB().Query(queryInsert)
-	if errInsert != nil {
-		c.Error(errInsert)
+	// 檢查優惠資料是否相符
+	if data.PercentageOff != orderData.Discount || data.Exchange != orderData.Exchange {
+		c.Error(errors.New("優惠資料錯誤！"))
+		return
 	}
 
-	rows.Close()
+	strNo, strQuantity := usersModel.FormatProductItems(orderData.Products)
 
-	c.String(200, "POST NewUserOrders()")
+	// Start transaction
+	txn, err := db.GetDB().Begin()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	// Rollback the transaction
+	defer txn.Rollback()
+
+	var orderID int // 新產生的訂單編號
+	row := txn.QueryRow(
+		`INSERT INTO orders (cost_coin, cost_point) VALUES ($1, $2) RETURNING order_id;`,
+		orderData.PayedCoin, orderData.PayedPoint,
+	)
+	if err := row.Scan(&orderID); err != nil {
+		c.Error(err)
+	}
+
+	sqlInsertItem := fmt.Sprintf(`
+		INSERT INTO order_items (order_id, product_no, quantity)
+		VALUES ($1, unnest(ARRAY[%s]), unnest(ARRAY[%s]));`,
+		strNo, strQuantity,
+	)
+	txn.Exec(sqlInsertItem, orderID)
+
+	rowUpdated := txn.QueryRow(
+		`UPDATE users
+		SET coin=coin-$1, point=point-$2, accumulated_spent=accumulated_spent+$3
+		WHERE uid=$4 RETURNING uid, coin, point, accumulated_spent;`,
+		orderData.PayedCoin, orderData.PayedPoint, orderData.PayedCoin, uid,
+	)
+	if err := rowUpdated.Err(); err != nil {
+		db.PrintDbError(err)
+		c.Error(err)
+		return
+	}
+
+	res := struct {
+		Uid              int
+		Coin             int
+		Point            int
+		AccumelatedSpent int `db:"accumulated_spent"`
+	}{}
+	errScan := rowUpdated.Scan(&res.Uid, &res.Coin, &res.Point, &res.AccumelatedSpent)
+	if errScan != nil {
+		c.Error(errScan)
+		return
+	}
+
+	// Commit transaction
+	errCommit := txn.Commit()
+	if errCommit != nil {
+		c.Error(errCommit)
+		return
+	}
+
+	c.JSON(200, res)
 }

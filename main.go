@@ -10,7 +10,6 @@ import (
 	cors "github.com/itsjamie/gin-cors"
 	"github.com/joho/godotenv"
 
-	"practice-sales-backend/api/middleware"
 	"practice-sales-backend/models/db"
 	"practice-sales-backend/routes"
 )
@@ -46,7 +45,7 @@ func main() {
 	}))
 
 	// Error handler，要放在所有 route 之前
-	server.Use(middleware.ErrorHandler)
+	//server.Use(middleware.ErrorHandler)
 
 	// Use RouterGroup to do nested routes
 	routes.MainRoutes(server.Group("/api"))

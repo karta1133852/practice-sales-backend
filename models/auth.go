@@ -25,7 +25,7 @@ type Payload struct {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-// 透過 uid 生成 JWT Token
+// CreateToken: 透過 uid 生成 JWT Token
 func (_ *authModel) CreateToken(uid int, username string) (token string, expiredTime time.Time, err error) {
 
 	now := time.Now()
@@ -55,13 +55,13 @@ func (_ *authModel) CreateToken(uid int, username string) (token string, expired
 }
 
 // TODO 要不要搬到 api/middleware 底下
-// 驗證用 middleware
-func (_ *authModel) Authenticate(c *gin.Context) {
+// Authenticate: 驗證用 middleware
+func (_ *authModel) Authenticate(c *gin.Context) (err error) {
 
 	auth := c.GetHeader("Authorization")
 	s := strings.Split(auth, "Bearer ")
 	if len(s) <= 1 {
-		c.Error(errors.New("Token not found"))
+		err = errors.New("Token not found")
 		c.Abort()
 		return
 	}
@@ -89,7 +89,7 @@ func (_ *authModel) Authenticate(c *gin.Context) {
 			}
 		}
 		// http.StatusUnauthorized
-		c.Error(errors.New(message))
+		err = errors.New(message)
 		c.Abort()
 		return
 	}
@@ -99,6 +99,7 @@ func (_ *authModel) Authenticate(c *gin.Context) {
 		c.Next()
 		return
 	} else {
+		err = errors.New("Token invalid")
 		c.Abort() // 取消執行接下來的 middleware
 		return
 	}

@@ -9,9 +9,13 @@ import (
 // 參考 https://zhuanlan.zhihu.com/p/76967528
 type HandlerFunc func(c *gin.Context) error
 
-func wrapper(handler HandlerFunc) func(c *gin.Context) {
+// Wrapper(error handler): 將 middleware 包起來並使其可以回傳 error
+func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		// 執行包起來的 middleware
 		handler(c)
+
+		// TODO github.com/pkg/errors warp error stack
 	}
 }
 

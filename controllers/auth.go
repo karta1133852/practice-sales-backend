@@ -18,7 +18,7 @@ type Auth struct {           // 包裝給外部使用
 
 var authModel models.Auth
 
-func (_ *authController) HashAndSalt(strPwd string) (err error, hashedPwd string) {
+func (_ *authController) HashAndSalt(strPwd string) (hashedPwd string, err error) {
 
 	bytePwd := []byte(strPwd)
 	hash, err := bcrypt.GenerateFromPassword(bytePwd, bcrypt.DefaultCost)
@@ -35,6 +35,7 @@ func (_ *authController) ComparePasswords(hashedPwd string, strPwd string) bool 
 	byteHash := []byte(hashedPwd)
 	bytePwd := []byte(strPwd)
 
+	// 密碼一樣回傳 nil, 不一樣回傳 err
 	err := bcrypt.CompareHashAndPassword(byteHash, bytePwd)
 	if err != nil {
 		return false
@@ -42,7 +43,7 @@ func (_ *authController) ComparePasswords(hashedPwd string, strPwd string) bool 
 	return true
 }
 
-func (this *authController) Login(c *gin.Context) {
+func (this *authController) Login(c *gin.Context) (err error) {
 
 	body := struct {
 		Username string
@@ -54,24 +55,22 @@ func (this *authController) Login(c *gin.Context) {
 		Uid       int
 		HashedPwd string `db:"password"`
 	}{}
-	err := db.GetDB().SelectOne(&data,
+	err = db.GetDB().SelectOne(&data,
 		`SELECT uid, password FROM users WHERE username=$1;`,
 		body.Username,
 	)
 	if err != nil {
-		c.Error(err)
 		return
 	}
 
 	isPwdSame := this.ComparePasswords(data.HashedPwd, body.Password)
 	if !isPwdSame {
-		c.Error(errors.New("使用者名稱或密碼錯誤"))
+		err = errors.New("使用者名稱或密碼錯誤")
 		return
 	}
 
 	token, expiredTime, err := authModel.CreateToken(data.Uid, body.Username)
 	if err != nil {
-		c.Error(err)
 		return
 	}
 
@@ -82,8 +81,10 @@ func (this *authController) Login(c *gin.Context) {
 		"uid":   data.Uid,
 		"token": token,
 	})
+	return
 }
 
-func (_ *authController) Logout(c *gin.Context) {
+func (_ *authController) Logout(c *gin.Context) (err error) {
 	c.String(200, "PUT Logout()")
+	return
 }

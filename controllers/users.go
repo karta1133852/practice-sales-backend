@@ -19,7 +19,7 @@ type Users struct {           // 包裝給外部使用
 
 var usersModel = models.Users{}
 
-func (_ *usersController) CreateUser(c *gin.Context) {
+func (_ *usersController) CreateUser(c *gin.Context) (err error) {
 
 	body := struct {
 		Username string
@@ -33,9 +33,10 @@ func (_ *usersController) CreateUser(c *gin.Context) {
 	// query := c.Request.URL.Query()
 	// c.String(200, userData.name)
 	c.JSON(200, body)
+	return
 }
 
-func (_ *usersController) GetUser(c *gin.Context) {
+func (_ *usersController) GetUser(c *gin.Context) (err error) {
 
 	uid := c.Param("uid")
 	user := struct {
@@ -51,24 +52,26 @@ func (_ *usersController) GetUser(c *gin.Context) {
 		SELECT uid, username, coin, point, vip_type, accumulated_spent
 		FROM public.users WHERE uid=$1 LIMIT 1
 	`
-	err := db.GetDB().SelectOne(&user, queryStr, uid)
+	err = db.GetDB().SelectOne(&user, queryStr, uid)
 	if err != nil {
-		c.Error(err)
 		return
 	}
 
 	c.JSON(200, user)
+	return
 }
 
-func (_ *usersController) UpdateUser(c *gin.Context) {
+func (_ *usersController) UpdateUser(c *gin.Context) (err error) {
 	c.String(200, "PATCH UpdateUser()")
+	return
 }
 
-func (_ *usersController) GetUserOrders(c *gin.Context) {
+func (_ *usersController) GetUserOrders(c *gin.Context) (err error) {
 	c.String(200, "GET GetUserOrders()")
+	return
 }
 
-func (_ *usersController) NewUserOrders(c *gin.Context) {
+func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 
 	// Parse order data
 	var body = models.OrderData{}
@@ -81,8 +84,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 	}
 
 	// 檢查付款金額是否相符
-	if err := usersModel.CheckTotal(body); err != nil {
-		c.Error(err)
+	if err = usersModel.CheckTotal(body); err != nil {
 		return
 	}
 
@@ -125,9 +127,8 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		PercentageOff    int `db:"percentage_off"`
 		Exchange         int
 	}{}
-	errSelect := db.GetDB().SelectOne(&data, querySelect, uid, strTimeNow)
-	if errSelect != nil {
-		c.Error(errSelect)
+	err = db.GetDB().SelectOne(&data, querySelect, uid, strTimeNow)
+	if err != nil {
 		return
 	}
 
@@ -137,7 +138,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	// 檢查優惠資料是否相符
 	if data.PercentageOff != body.Discount || data.Exchange != body.Exchange {
-		c.Error(errors.New("優惠資料錯誤！"))
+		err = errors.New("優惠資料錯誤！")
 		return
 	}
 
@@ -146,7 +147,6 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 	// Start transaction
 	txn, err := db.GetDB().Begin()
 	if err != nil {
-		c.Error(err)
 		return
 	}
 
@@ -158,8 +158,8 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		`INSERT INTO orders (cost_coin, cost_point, time) VALUES ($1, $2, $3) RETURNING order_id;`,
 		body.PayedCoin, body.PayedPoint, strTimeNow,
 	)
-	if err := row.Scan(&orderID); err != nil {
-		c.Error(err)
+	if err = row.Scan(&orderID); err != nil {
+		return
 	}
 
 	// ARRAY[$]內使用 Query format 會被強制加上 ' '
@@ -168,7 +168,10 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		VALUES (%d, unnest(ARRAY[%s]), unnest(ARRAY[%s]));`,
 		orderID, strNo, strQuantity,
 	)
-	txn.Exec(sqlInsertItem)
+	_, err = txn.Exec(sqlInsertItem)
+	if err != nil {
+		return
+	}
 
 	rowUpdated := txn.QueryRow(
 		`UPDATE users
@@ -176,9 +179,8 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		WHERE uid=$4 RETURNING uid, coin, point, accumulated_spent;`,
 		body.PayedCoin, body.PayedPoint, body.PayedCoin, uid,
 	)
-	if err := rowUpdated.Err(); err != nil {
-		db.PrintDbError(err)
-		c.Error(err)
+	if err = rowUpdated.Err(); err != nil {
+		//db.PrintDbError(err)
 		return
 	}
 
@@ -189,20 +191,19 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		AccumelatedSpent int `db:"accumulated_spent"`
 		orderId          int // 僅用於 Response
 	}{}
-	errScan := rowUpdated.Scan(&res.Uid, &res.Coin, &res.Point, &res.AccumelatedSpent)
-	if errScan != nil {
-		c.Error(errScan)
+	err = rowUpdated.Scan(&res.Uid, &res.Coin, &res.Point, &res.AccumelatedSpent)
+	if err != nil {
 		return
 	}
 
 	// Commit transaction
-	errCommit := txn.Commit()
-	if errCommit != nil {
-		c.Error(errCommit)
+	err = txn.Commit()
+	if err != nil {
 		return
 	}
 
 	// 加上 orderId
 	res.orderId = orderID
 	c.JSON(200, res)
+	return
 }

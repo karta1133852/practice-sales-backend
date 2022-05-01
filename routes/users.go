@@ -3,23 +3,24 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 
+	. "practice-sales-backend/api/middleware"
 	"practice-sales-backend/controllers"
 )
 
-var usersController controllers.Users
-
 func UsersRoutes(router *gin.RouterGroup) {
 
-	router.Use(authModel.Authenticate)
+	var usersController controllers.Users
+
+	router.Use(Wrapper(authModel.Authenticate))
 
 	// 新增 User
-	router.POST("/", usersController.CreateUser)
+	router.POST("/", Wrapper(usersController.CreateUser))
 
-	router.GET("/:uid", usersController.GetUser)
-	router.PATCH("/:uid", usersController.UpdateUser)
+	router.GET("/:uid", Wrapper(usersController.GetUser))
+	router.PATCH("/:uid", Wrapper(usersController.UpdateUser))
 	// 取得使用者的訂單列表
-	router.GET("/:uid/orders", usersController.GetUserOrders)
+	router.GET("/:uid/orders", Wrapper(usersController.GetUserOrders))
 	// 新增訂單
-	router.POST("/:uid/orders", usersController.NewUserOrders)
+	router.POST("/:uid/orders", Wrapper(usersController.NewUserOrders))
 
 }

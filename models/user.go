@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"math"
 	"strconv"
 	"strings"
@@ -33,7 +32,7 @@ func (_ *usersModel) CheckTotal(orderData OrderData) error {
 	equivalentTotal := orderData.PayedCoin + int(math.Round(float64(orderData.PayedPoint)*(float64(orderData.Exchange)/100.0)))
 
 	if discountTotal != equivalentTotal {
-		return errors.New("付款金額錯誤")
+		return &CustomError{StatusCode: 422, Title: "參數錯誤", Message: "付款金額錯誤"}
 	} else {
 		return nil
 	}

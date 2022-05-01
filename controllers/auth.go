@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
@@ -65,7 +63,7 @@ func (this *authController) Login(c *gin.Context) (err error) {
 
 	isPwdSame := this.ComparePasswords(data.HashedPwd, body.Password)
 	if !isPwdSame {
-		err = errors.New("使用者名稱或密碼錯誤")
+		err = &models.CustomError{StatusCode: 401, Message: "使用者名稱或密碼錯誤"}
 		return
 	}
 

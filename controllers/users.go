@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -79,7 +78,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 
 	// 檢查參數
 	if body.OriginalPrice == 0 {
-		c.Error(errors.New("訂單金額需大於 0 元"))
+		err = &models.CustomError{StatusCode: 422, Title: "參數錯誤", Message: "訂單金額需大於 0 元"}
 		return
 	}
 
@@ -138,7 +137,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 
 	// 檢查優惠資料是否相符
 	if data.PercentageOff != body.Discount || data.Exchange != body.Exchange {
-		err = errors.New("優惠資料錯誤！")
+		err = &models.CustomError{StatusCode: 422, Title: "參數錯誤", Message: "優惠資料錯誤！"}
 		return
 	}
 

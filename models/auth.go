@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -61,7 +60,7 @@ func (_ *authModel) Authenticate(c *gin.Context) (err error) {
 	auth := c.GetHeader("Authorization")
 	s := strings.Split(auth, "Bearer ")
 	if len(s) <= 1 {
-		err = errors.New("Token not found")
+		err = &CustomError{StatusCode: 401, Message: "Token not found"}
 		c.Abort()
 		return
 	}
@@ -89,7 +88,7 @@ func (_ *authModel) Authenticate(c *gin.Context) (err error) {
 			}
 		}
 		// http.StatusUnauthorized
-		err = errors.New(message)
+		err = &CustomError{StatusCode: 401, Message: message}
 		c.Abort()
 		return
 	}
@@ -99,7 +98,7 @@ func (_ *authModel) Authenticate(c *gin.Context) (err error) {
 		c.Next()
 		return
 	} else {
-		err = errors.New("Token invalid")
+		err = &CustomError{StatusCode: 401, Message: "Token invalid"}
 		c.Abort() // 取消執行接下來的 middleware
 		return
 	}

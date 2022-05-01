@@ -186,6 +186,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		Coin             int
 		Point            int
 		AccumelatedSpent int `db:"accumulated_spent"`
+		orderId          int // 僅用於 Response
 	}{}
 	errScan := rowUpdated.Scan(&res.Uid, &res.Coin, &res.Point, &res.AccumelatedSpent)
 	if errScan != nil {
@@ -200,5 +201,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		return
 	}
 
+	// 加上 orderId
+	res.orderId = orderID
 	c.JSON(200, res)
 }

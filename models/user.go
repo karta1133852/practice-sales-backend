@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// AuthController
+// UsersModel
 type usersModel struct{} // 方便閱讀 private
 type Users struct {      // 包裝給外部使用
 	*usersModel

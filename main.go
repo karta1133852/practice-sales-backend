@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"practice-sales-backend/api/middleware"
+	"practice-sales-backend/controllers"
 	"practice-sales-backend/models/db"
 	"practice-sales-backend/routes"
 )
@@ -52,8 +53,10 @@ func main() {
 	routes.MainRoutes(server.Group("/api"))
 
 	server.GET("/", func(c *gin.Context) {
+		u := controllers.Auth{}
+		_, pass := u.HashAndSalt("5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8")
 		c.JSON(200, gin.H{
-			"title":   "Root",
+			"title":   pass,
 			"message": "Hi!",
 		})
 	})

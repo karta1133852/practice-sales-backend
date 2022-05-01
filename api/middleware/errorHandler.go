@@ -21,6 +21,7 @@ func ErrorHandler(c *gin.Context) {
 
 	for _, err := range c.Errors {
 		// log, handle, etc.
+		// log.Printf("Error: %s", err.Error())
 		c.String(http.StatusNotFound, "Error: "+err.Error())
 		// c.Status(http.StatusNotFound)
 		// c.Writer.Write([]byte(err.Error()))

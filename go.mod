@@ -3,6 +3,7 @@ module practice-sales-backend
 go 1.18
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/gzip v0.0.5
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-gorp/gorp v2.2.0+incompatible
@@ -10,6 +11,7 @@ require (
 	github.com/itsjamie/gin-cors v0.0.0-20220228161158-ef28d3d2a0a8
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.5
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 )
 
 require (
@@ -28,7 +30,6 @@ require (
 	github.com/poy/onpar v1.1.2 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

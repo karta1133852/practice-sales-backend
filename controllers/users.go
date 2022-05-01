@@ -20,18 +20,18 @@ var usersModel = models.Users{}
 
 func (_ *usersController) CreateUser(c *gin.Context) {
 
-	userData := struct {
+	body := struct {
 		Username string
 		Password string
 	}{}
-	c.BindJSON(&userData)
+	c.BindJSON(&body)
 
 	// TODO 加鹽
 	// TODO 新增至 Database
 
 	// query := c.Request.URL.Query()
 	// c.String(200, userData.name)
-	c.JSON(200, userData)
+	c.JSON(200, body)
 }
 
 func (_ *usersController) GetUser(c *gin.Context) {
@@ -70,17 +70,17 @@ func (_ *usersController) GetUserOrders(c *gin.Context) {
 func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	// Parse order data
-	var orderData = models.OrderData{}
-	c.BindJSON(&orderData)
+	var body = models.OrderData{}
+	c.BindJSON(&body)
 
 	// 檢查參數
-	if orderData.OriginalPrice == 0 {
+	if body.OriginalPrice == 0 {
 		c.Error(errors.New("訂單金額需大於 0 元"))
 		return
 	}
 
 	// 檢查付款金額是否相符
-	if err := usersModel.CheckTotal(orderData); err != nil {
+	if err := usersModel.CheckTotal(body); err != nil {
 		c.Error(err)
 		return
 	}
@@ -135,12 +135,12 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 	// TODO 讀取 SQL error 判斷
 
 	// 檢查優惠資料是否相符
-	if data.PercentageOff != orderData.Discount || data.Exchange != orderData.Exchange {
+	if data.PercentageOff != body.Discount || data.Exchange != body.Exchange {
 		c.Error(errors.New("優惠資料錯誤！"))
 		return
 	}
 
-	strNo, strQuantity := usersModel.FormatProductItems(orderData.Products)
+	strNo, strQuantity := usersModel.FormatProductItems(body.Products)
 
 	// Start transaction
 	txn, err := db.GetDB().Begin()
@@ -155,7 +155,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 	var orderID int // 新產生的訂單編號
 	row := txn.QueryRow(
 		`INSERT INTO orders (cost_coin, cost_point, time) VALUES ($1, $2, $3) RETURNING order_id;`,
-		orderData.PayedCoin, orderData.PayedPoint, strTimeNow,
+		body.PayedCoin, body.PayedPoint, strTimeNow,
 	)
 	if err := row.Scan(&orderID); err != nil {
 		c.Error(err)
@@ -173,7 +173,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 		`UPDATE users
 		SET coin=coin-$1, point=point-$2, accumulated_spent=accumulated_spent+$3
 		WHERE uid=$4 RETURNING uid, coin, point, accumulated_spent;`,
-		orderData.PayedCoin, orderData.PayedPoint, orderData.PayedCoin, uid,
+		body.PayedCoin, body.PayedPoint, body.PayedCoin, uid,
 	)
 	if err := rowUpdated.Err(); err != nil {
 		db.PrintDbError(err)

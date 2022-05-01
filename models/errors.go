@@ -1,7 +1,7 @@
 package models
 
 type CustomError struct {
-	statusCode int // JSON 忽略小寫
+	statusCode int // 小寫讓 JSON 忽略
 	Title      string
 	Message    string
 }

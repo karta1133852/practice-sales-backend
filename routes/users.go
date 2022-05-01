@@ -8,18 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var usersController controllers.Users
+
 func UsersRoutes(router *gin.RouterGroup) {
 
-	users := controllers.Users{}
+	router.Use(authModel.Authenticate)
 
 	// 新增 User
-	router.POST("/", users.CreateUser)
+	router.POST("/", usersController.CreateUser)
 
-	router.GET("/:uid", users.GetUser)
-	router.PATCH("/:uid", users.UpdateUser)
+	router.GET("/:uid", usersController.GetUser)
+	router.PATCH("/:uid", usersController.UpdateUser)
 	// 取得使用者的訂單列表
-	router.GET("/:uid/orders", users.GetUserOrders)
+	router.GET("/:uid/orders", usersController.GetUserOrders)
 	// 新增訂單
-	router.POST("/:uid/orders", users.NewUserOrders)
+	router.POST("/:uid/orders", usersController.NewUserOrders)
 
 }

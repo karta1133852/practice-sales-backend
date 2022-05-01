@@ -68,12 +68,14 @@ func (this *authController) Login(c *gin.Context) {
 		return
 	}
 
-	// TODO jwt
-	token, err := authModel.CreateToken(data.Uid, body.Username)
+	token, expiredTime, err := authModel.CreateToken(data.Uid, body.Username)
 	if err != nil {
 		c.Error(err)
 		return
 	}
+
+	// TODO add to redis
+	expiredTime.UTC()
 
 	c.JSON(200, gin.H{
 		"uid":   data.Uid,

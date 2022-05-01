@@ -1,10 +1,12 @@
 package routes
 
 import (
-	//"net/http"
+	"practice-sales-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
+
+var authModel models.Auth
 
 func MainRoutes(router *gin.RouterGroup) {
 

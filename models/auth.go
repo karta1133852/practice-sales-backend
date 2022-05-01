@@ -62,6 +62,8 @@ func (_ *authModel) Authenticate(c *gin.Context) {
 	s := strings.Split(auth, "Bearer ")
 	if len(s) <= 1 {
 		c.Error(errors.New("Token not found"))
+		c.Abort()
+		return
 	}
 	token := s[1]
 

@@ -25,7 +25,7 @@ func (_ *usersController) CreateUser(c *gin.Context) {
 		Username string
 		Password string
 	}{}
-	c.BindJSON(&body)
+	c.ShouldBindJSON(&body)
 
 	// TODO 加鹽
 	// TODO 新增至 Database
@@ -72,7 +72,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) {
 
 	// Parse order data
 	var body = models.OrderData{}
-	c.BindJSON(&body)
+	c.ShouldBindJSON(&body)
 
 	// 檢查參數
 	if body.OriginalPrice == 0 {

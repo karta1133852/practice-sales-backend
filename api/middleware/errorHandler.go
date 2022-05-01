@@ -16,9 +16,10 @@ func wrapper(handler HandlerFunc) func(c *gin.Context) {
 }
 
 func ErrorHandler(c *gin.Context) {
-	// 確保其他 middleware 執行
+	// 其他 middleware 先執行
 	c.Next()
 
+	// 再來處理 Error
 	for _, err := range c.Errors {
 		// log, handle, etc.
 		// log.Printf("Error: %s", err.Error())

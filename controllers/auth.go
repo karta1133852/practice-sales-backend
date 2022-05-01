@@ -48,7 +48,7 @@ func (this *authController) Login(c *gin.Context) {
 		Username string
 		Password string
 	}{}
-	c.BindJSON(&body)
+	c.ShouldBindJSON(&body)
 
 	data := struct {
 		Uid       int

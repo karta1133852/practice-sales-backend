@@ -15,6 +15,95 @@
 }
 ```
 
+# API Routes
+## Authentication
+- Login: ```POST /api/auth/login```
+  - Request body
+    ```JSON
+    {
+      "username": "usr",
+      "password": "pwd"
+    }
+    ```
+  - Response
+    ```JSON
+    {
+      "uid": 1,
+      "token": "jwtToken"
+    }
+    ```
+## Users
+- Get user's data: ```GET /api/users/:uid```
+  - Response
+    ```JSON
+    {
+      "uid": 1,
+      "username": "user01",
+      "coin": 655,
+      "point": 470,
+      "vipType": "Normal",
+      "accumulatedSpent": 345
+    }
+    ```
+- Create new user: ```POST /api/users```
+  - Request body
+    ```JSON
+    {
+      "username": "usr",
+      "password": "pwd"
+    }
+    ```
+  - Response
+    ```JSON
+    {
+      "uid": 1
+    }
+    ```
+- Get user's orders list: ```GET /api/users/:uid/orders```
+  - Response
+    ```JSON
+    [
+      {
+        "orderId": 1,
+        "time": "2022-04-30T16:44:38Z"
+      },
+      {
+        "orderId": 3,
+        "time": "2022-05-01T09:57:35Z"
+      },
+    ]
+    ```
+- Create new order: ```POST /api/users/:uid/orders```
+  - Request body
+    ```JSON
+    {
+      "originalPrice": 150,
+      "payedCoin": 115,
+      "payedPoint": 10,
+      "exchange": 200,  // point's exchange rate (%)
+      "discount": 10,   // discount off (%)
+      "products": [
+        {
+          "productNo": 2,
+          "quantity": 5
+        },
+        {
+          "productNo": 3,
+          "quantity": 1
+        }
+      ]
+    }
+    ```
+  - Response
+    ```JSON
+    {
+      "uid": 1,
+      "coin": 655,
+      "point": 470,
+      "accumulatedSpent": 345,
+      "orderId": 4
+    }
+    ```
   
 # Build
 ## Local

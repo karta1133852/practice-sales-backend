@@ -78,7 +78,34 @@ func (_ *usersController) UpdateUser(c *gin.Context) (err error) {
 
 func (_ *usersController) GetUserOrders(c *gin.Context) (err error) {
 
-	c.String(200, "GET GetUserOrders()")
+	uid := c.Param("uid")
+
+	queryStr := `SELECT order_id, "time" FROM orders WHERE uid=$1`
+	rows, err := db.GetDB().Query(queryStr, uid)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	type oStruct struct {
+		OrderId int    `json:"orderId"`
+		Time    string `json:"time"`
+	}
+	orders := make([]oStruct, 0)
+	for rows.Next() {
+		var orderId int
+		var time string
+		if err = rows.Scan(&orderId, &time); err != nil {
+			return
+		}
+		orders = append(orders, oStruct{orderId, time})
+	}
+	// Check for errors from iterating over rows.
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	c.JSON(200, orders)
 	return
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // AuthModel
@@ -23,6 +24,31 @@ type Payload struct {
 }
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+
+func (_ *authModel) HashAndSalt(strPwd string) (hashedPwd string, err error) {
+
+	bytePwd := []byte(strPwd)
+	hash, err := bcrypt.GenerateFromPassword(bytePwd, bcrypt.DefaultCost)
+	if err != nil {
+		return
+	}
+
+	hashedPwd = string(hash)
+	return
+}
+
+func (_ *authModel) ComparePasswords(hashedPwd string, strPwd string) bool {
+
+	byteHash := []byte(hashedPwd)
+	bytePwd := []byte(strPwd)
+
+	// 密碼一樣回傳 nil, 不一樣回傳 err
+	err := bcrypt.CompareHashAndPassword(byteHash, bytePwd)
+	if err != nil {
+		return false
+	}
+	return true
+}
 
 // CreateToken: 透過 uid 生成 JWT Token
 func (_ *authModel) CreateToken(uid int, username string) (token string, expiredTime time.Time, err error) {

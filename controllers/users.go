@@ -20,7 +20,7 @@ var usersModel = models.Users{}
 
 func (_ *usersController) CreateUser(c *gin.Context) (err error) {
 
-	var authController Auth
+	var authModel models.Auth
 
 	body := struct {
 		Username string
@@ -28,7 +28,7 @@ func (_ *usersController) CreateUser(c *gin.Context) (err error) {
 	}{}
 	c.ShouldBindJSON(&body)
 
-	hashedPwd, err := authController.HashAndSalt(body.Password)
+	hashedPwd, err := authModel.HashAndSalt(body.Password)
 	if err != nil {
 		return
 	}

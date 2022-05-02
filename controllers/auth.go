@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 
 	"practice-sales-backend/models"
 	"practice-sales-backend/models/db"
@@ -12,33 +11,6 @@ import (
 type authController struct{} // 方便閱讀 private
 type Auth struct {           // 包裝給外部使用
 	*authController
-}
-
-var authModel models.Auth
-
-func (_ *authController) HashAndSalt(strPwd string) (hashedPwd string, err error) {
-
-	bytePwd := []byte(strPwd)
-	hash, err := bcrypt.GenerateFromPassword(bytePwd, bcrypt.DefaultCost)
-	if err != nil {
-		return
-	}
-
-	hashedPwd = string(hash)
-	return
-}
-
-func (_ *authController) ComparePasswords(hashedPwd string, strPwd string) bool {
-
-	byteHash := []byte(hashedPwd)
-	bytePwd := []byte(strPwd)
-
-	// 密碼一樣回傳 nil, 不一樣回傳 err
-	err := bcrypt.CompareHashAndPassword(byteHash, bytePwd)
-	if err != nil {
-		return false
-	}
-	return true
 }
 
 func (this *authController) Login(c *gin.Context) (err error) {
@@ -61,7 +33,8 @@ func (this *authController) Login(c *gin.Context) (err error) {
 		return
 	}
 
-	isPwdSame := this.ComparePasswords(data.HashedPwd, body.Password)
+	var authModel models.Auth
+	isPwdSame := authModel.ComparePasswords(data.HashedPwd, body.Password)
 	if !isPwdSame {
 		err = &models.CustomError{StatusCode: 401, Message: "使用者名稱或密碼錯誤"}
 		return
@@ -83,6 +56,7 @@ func (this *authController) Login(c *gin.Context) (err error) {
 }
 
 func (_ *authController) Logout(c *gin.Context) (err error) {
+	// TODO 從 Redis 中刪除 Token
 	c.String(200, "PUT Logout()")
 	return
 }

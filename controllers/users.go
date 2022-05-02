@@ -160,6 +160,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 		AccumulatedSpent int `db:"accumulated_spent"`
 		PercentageOff    int `db:"percentage_off"`
 		Exchange         int
+		VipType          string `db:"vip_type"`
 	}{}
 	err = db.GetDB().SelectOne(&data, querySelect, uid, strTimeNow)
 	if err != nil {
@@ -176,7 +177,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 	}
 
 	// 檢查付款金額是否相符
-	if err = usersModel.CheckTotal(body); err != nil {
+	if err = usersModel.CheckTotal(body, data.VipType); err != nil {
 		return
 	}
 

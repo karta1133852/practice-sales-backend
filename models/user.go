@@ -26,12 +26,18 @@ type OrderData struct {
 	Products      []ProductItem
 }
 
-func (_ *usersModel) CheckTotal(orderData OrderData) error {
+func (_ *usersModel) CheckTotal(orderData OrderData, vipType string) error {
 
-	discountTotal := int(math.Round(float64(orderData.OriginalPrice) * (1.0 - float64(orderData.Discount)/100.0)))
-	equivalentTotal := orderData.PayedCoin + int(math.Round(float64(orderData.PayedPoint)*(float64(orderData.Exchange)/100.0)))
+	appropriateTotal := int(math.Round(float64(orderData.OriginalPrice) * (1.0 - float64(orderData.Discount)/100.0)))
+	equivalentTotal := orderData.PayedCoin + int(math.Round(float64(orderData.PayedPoint*orderData.Exchange)/100.0))
 
-	if discountTotal != equivalentTotal {
+	// 此處為第二次新增的折扣方式
+	// 如果有VIP身份扣100點以上折抵，另外享再九折優惠
+	if vipType != "Normal" && orderData.PayedPoint >= 100 {
+		appropriateTotal = int(math.Round(float64(appropriateTotal) * 0.9))
+	}
+
+	if appropriateTotal != equivalentTotal {
 		return &CustomError{StatusCode: 422, Title: "參數錯誤", Message: "付款金額錯誤"}
 	} else {
 		return nil

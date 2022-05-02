@@ -121,11 +121,6 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 		return
 	}
 
-	// 檢查付款金額是否相符
-	if err = usersModel.CheckTotal(body); err != nil {
-		return
-	}
-
 	// 取得使用者與優惠折扣資料
 	uid := c.Param("uid")
 	strTimeNow := time.Now().Format(time.RFC3339)
@@ -172,12 +167,16 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 	}
 
 	// 檢查金額是否足夠
-	//if user.Coin
 	// TODO 讀取 SQL error 判斷
 
 	// 檢查優惠資料是否相符
 	if data.PercentageOff != body.Discount || data.Exchange != body.Exchange {
 		err = &models.CustomError{StatusCode: 422, Title: "參數錯誤", Message: "優惠資料錯誤！"}
+		return
+	}
+
+	// 檢查付款金額是否相符
+	if err = usersModel.CheckTotal(body); err != nil {
 		return
 	}
 

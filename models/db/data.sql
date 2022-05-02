@@ -189,6 +189,7 @@ ALTER TABLE public.order_items OWNER TO user01;
 
 CREATE TABLE public.orders (
     order_id integer NOT NULL,
+    uid integer NOT NULL,
     cost_coin integer NOT NULL,
     cost_point integer NOT NULL,
     "time" timestamp without time zone DEFAULT now() NOT NULL
@@ -447,9 +448,9 @@ COPY public.order_items (order_id, product_no, quantity) FROM stdin;
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: user01
 --
 
-COPY public.orders (order_id, cost_coin, cost_point, "time") FROM stdin;
-4	100	38	2022-05-02 00:49:57
-3	115	10	2022-04-30 16:44:38
+COPY public.orders (order_id, uid, cost_coin, cost_point, "time") FROM stdin;
+4	1 100	38	2022-05-02 00:49:57
+3	2 115	10	2022-04-30 16:44:38
 \.
 
 

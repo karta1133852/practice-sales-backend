@@ -77,6 +77,7 @@ func (_ *usersController) UpdateUser(c *gin.Context) (err error) {
 }
 
 func (_ *usersController) GetUserOrders(c *gin.Context) (err error) {
+
 	c.String(200, "GET GetUserOrders()")
 	return
 }
@@ -166,8 +167,8 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 
 	var orderID int // 新產生的訂單編號
 	row := txn.QueryRow(
-		`INSERT INTO orders (cost_coin, cost_point, time) VALUES ($1, $2, $3) RETURNING order_id;`,
-		body.PayedCoin, body.PayedPoint, strTimeNow,
+		`INSERT INTO orders (uid, cost_coin, cost_point, time) VALUES ($1, $2, $3, $4) RETURNING order_id;`,
+		uid, body.PayedCoin, body.PayedPoint, strTimeNow,
 	)
 	if err = row.Scan(&orderID); err != nil {
 		return

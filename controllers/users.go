@@ -38,25 +38,25 @@ func (_ *usersController) CreateUser(c *gin.Context) (err error) {
 func (_ *usersController) GetUser(c *gin.Context) (err error) {
 
 	uid := c.Param("uid")
-	user := struct {
-		Uid               int
-		Username          string
-		Coin              int
-		Point             int
-		Vip_Type          string
-		Accumulated_spent int
+	res := struct {
+		Uid              int    `json:"uid"`
+		Username         string `json:"username"`
+		Coin             int    `json:"coin"`
+		Point            int    `json:"point"`
+		VipType          string `json:"vipType" db:"vip_type"`
+		AccumulatedSpent int    `json:"accumulatedSpent" db:"accumulated_spent"`
 	}{}
 
 	queryStr := `
 		SELECT uid, username, coin, point, vip_type, accumulated_spent
 		FROM public.users WHERE uid=$1 LIMIT 1
 	`
-	err = db.GetDB().SelectOne(&user, queryStr, uid)
+	err = db.GetDB().SelectOne(&res, queryStr, uid)
 	if err != nil {
 		return
 	}
 
-	c.JSON(200, user)
+	c.JSON(200, res)
 	return
 }
 
@@ -116,7 +116,8 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 				WHERE vip_type=(SELECT vip_type FROM u)
 				GROUP BY 1) z
 			) AS pi
-			USING (p_no)) b;
+			USING (p_no)) b
+		LIMIT 1;
 	`
 
 	data := struct {
@@ -184,11 +185,11 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 	}
 
 	res := struct {
-		Uid              int
-		Coin             int
-		Point            int
-		AccumelatedSpent int `db:"accumulated_spent"`
-		orderId          int // 僅用於 Response
+		Uid              int `json:"uid"`
+		Coin             int `json:"coin"`
+		Point            int `json:"point"`
+		AccumelatedSpent int `json:"accumulatedSpent" db:"accumulated_spent"`
+		OrderId          int `json:"orderId"`
 	}{}
 	err = rowUpdated.Scan(&res.Uid, &res.Coin, &res.Point, &res.AccumelatedSpent)
 	if err != nil {
@@ -202,7 +203,7 @@ func (_ *usersController) NewUserOrders(c *gin.Context) (err error) {
 	}
 
 	// 加上 orderId
-	res.orderId = orderID
+	res.OrderId = orderID
 	c.JSON(200, res)
 	return
 }

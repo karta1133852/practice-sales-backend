@@ -8,6 +8,9 @@ build: setup
 build-linux: setup
 	GOARCH=amd64 GOOS=linux go build -o bin/${APP_NAME} main.go
 
+gin:
+	gin -p 8080 -a 3000
+
 run:
 	bin/${APP_NAME}
 

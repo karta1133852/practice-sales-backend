@@ -20,18 +20,29 @@ var usersModel = models.Users{}
 
 func (_ *usersController) CreateUser(c *gin.Context) (err error) {
 
+	var authController Auth
+
 	body := struct {
 		Username string
 		Password string
 	}{}
 	c.ShouldBindJSON(&body)
 
-	// TODO 加鹽
-	// TODO 新增至 Database
+	hashedPwd, err := authController.HashAndSalt(body.Password)
+	if err != nil {
+		return
+	}
 
-	// query := c.Request.URL.Query()
-	// c.String(200, userData.name)
-	c.JSON(200, body)
+	queryInsert := `INSERT INTO users (username, password) VALUES ($1, $2) RETURNING uid;`
+	row := db.GetDB().QueryRow(queryInsert, body.Username, hashedPwd)
+
+	var uid int
+	err = row.Scan(&uid)
+	if err != nil {
+		return
+	}
+
+	c.JSON(200, gin.H{"uid": uid})
 	return
 }
 

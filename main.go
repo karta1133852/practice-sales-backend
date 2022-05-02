@@ -44,9 +44,6 @@ func main() {
 		ValidateHeaders: false,
 	}))
 
-	// Error handler，要放在所有 route 之前
-	//server.Use(middleware.ErrorHandler)
-
 	// Use RouterGroup to do nested routes
 	routes.MainRoutes(server.Group("/api"))
 
